@@ -17,7 +17,7 @@ function preload() {
   this.load.image("right-arrow", "./img/right-arrow.png");
   this.load.image("dinasaur", "./img/dinasaur.svg");
   this.load.audio("impact", "./sound/end.wav");
-  this.load.audio("bonus", "./sound/ring.wav");
+  this.load.audio("bonus", "./sound/ding.wav");
   this.load.audio("bg-music", "./sound/youtube-shawl-paul.mp3");
 }
 

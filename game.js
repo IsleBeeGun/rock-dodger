@@ -3,6 +3,69 @@ const gameState = {
 };
 
 function preload() {
+
+  // adding progress bar
+  let progressBar = this.add.graphics();
+  let progressBox = this.add.graphics();
+  progressBox.fillStyle(0xffffff, 0.3);
+  progressBox.fillRect(160, 170, 320, 50);
+  let width = this.cameras.main.width;
+  let height = this.cameras.main.height;
+  let loadingText = this.make.text({
+    x: width / 2,
+    y: height / 2 - 35,
+    text: "Loading...",
+    style: {
+      font: "36px monospace",
+      fill: "#ffffff"
+    }
+  });
+  loadingText.setOrigin(0.5, 0.5);
+
+  let percentText = this.make.text({
+    x: width / 2,
+    y: height / 2 + 15,
+    text: "0%",
+    style: {
+      font: "18px monospace",
+      fill: "#000000"
+    }
+  });
+  percentText.setOrigin(0.5, 0.5);
+
+  let assetText = this.make.text({
+    x: width / 2,
+    y: height / 2 + 50,
+    text: "",
+    style: {
+      font: "18px monospace",
+      fill: "#ffffff"
+    }
+  });
+  assetText.setOrigin(0.5, 0.5);
+
+  // checking loading progress
+  this.load.on("progress", function(value) {
+    // console.log(value);
+    progressBar.clear();
+    progressBar.fillStyle(0xffffff, 1);
+    progressBar.fillRect(170, 180, 300 * value, 30);
+    percentText.setText(parseInt(value * 100) + "%");
+  });
+
+  this.load.on("fileprogress", function(file) {
+    // console.log(file.src);
+    assetText.setText("Loading asset: " + file.key);
+  });
+
+  this.load.on("complete", function() {
+    // console.log("complete");
+    progressBar.destroy();
+    progressBox.destroy();
+    loadingText.destroy();
+    percentText.destroy();
+    assetText.destroy();
+  });
   this.load.image("sky", "./img/sky.png");
   this.load.image("background", "./img/back.png");
   this.load.image("grass", "./img/grass-back.png");
@@ -12,27 +75,33 @@ function preload() {
   this.load.image("meat-1", "./img/meat-1.svg");
   this.load.image("meat-2", "./img/meat-2.svg");
   this.load.image("meat-3", "./img/meat-3.svg");
+  this.load.audio("bg-music", "./sound/youtube-shawl-paul.mp3");
   this.load.image("platform", "./img/platform.png");
   this.load.image("left-arrow", "./img/left-arrow.png");
   this.load.image("right-arrow", "./img/right-arrow.png");
   this.load.image("dinasaur", "./img/dinasaur.svg");
   this.load.audio("impact", "./sound/end.wav");
   this.load.audio("bonus", "./sound/ding.wav");
-  this.load.audio("bg-music", "./sound/youtube-shawl-paul.mp3");
 }
 
 function create() {
-  this.add.image(0,0,'background').setOrigin(0,0);
-  this.add.image(0,0,'sky').setOrigin(0,0);
-  this.add.image(0,262 ,'grass').setOrigin(0,0);
+  this.add.image(0, 0, "background").setOrigin(0, 0);
+  this.add.image(0, 0, "sky").setOrigin(0, 0);
+  this.add.image(0, 262, "grass").setOrigin(0, 0);
   gameState.moveLeft = false;
   gameState.moveRight = false;
   gameState.impactSound = this.sound.add("impact");
   gameState.bonusSound = this.sound.add("bonus");
-  gameState.leftArrow = this.add.image(50, 180,'left-arrow');
-  gameState.leftArrow.setDepth(10).setAlpha(0.3).setInteractive();
-  gameState.rightArrow = this.add.image(590, 180,'right-arrow');
-  gameState.rightArrow.setDepth(10).setAlpha(0.3).setInteractive();
+  gameState.leftArrow = this.add.image(50, 180, "left-arrow");
+  gameState.leftArrow
+    .setDepth(10)
+    .setAlpha(0.2)
+    .setInteractive();
+  gameState.rightArrow = this.add.image(590, 180, "right-arrow");
+  gameState.rightArrow
+    .setDepth(10)
+    .setAlpha(0.2)
+    .setInteractive();
   gameState.music = this.sound.add("bg-music"); // added background music
   const musicConfig = {
     mute: false,
@@ -52,16 +121,16 @@ function create() {
 
   platforms.create(320, 350, "platform").refreshBody();
 
-  gameState.scoreText = this.add.text(10, 340, "Score: 0", {
-    fontSize: "15px",
-    fill: "#FFF",
-	backgroundColor: "#000",
-	padding: {
-        left: 5,
-        right: 5,
-        top: 2,
-        bottom: 2
-	  }
+  gameState.scoreText = this.add.text(10, 336, "Score: 0", {
+    fontSize: "18px",
+    fill: "#0F0",
+    backgroundColor: "#000",
+    padding: {
+      left: 5,
+      right: 5,
+      top: 2,
+      bottom: 2
+    }
   });
 
   gameState.player = this.physics.add.sprite(320, 300, "dinasaur");
@@ -117,39 +186,47 @@ function create() {
     gameState.music.stop();
     this.physics.pause();
 
-    this.add.text(205, 150, "Game Over!\n \nClick here or\nHit spacebar to Restart", {
-      fontSize: "15px",
-      fill: "#000",
-      backgroundColor: "#FFF",
-      padding: {
-        left: 10,
-        right: 10,
-        top: 10,
-        bottom: 10
-	  },
-	  align: 'center',
-    });
-    this.input.on('pointerdown', () => {
+    this.add.text(
+      205,
+      150,
+      "Game Over!\n \nClick here or\nHit spacebar to Restart",
+      {
+        fontSize: "15px",
+        fill: "#000",
+        backgroundColor: "#FFF",
+        padding: {
+          left: 10,
+          right: 10,
+          top: 10,
+          bottom: 10
+        },
+        align: "center"
+      }
+    );
+    this.input.on("pointerdown", () => {
       this.scene.restart();
-    })
+    });
     this.input.keyboard.on("keyup-SPACE", () => {
       this.scene.restart();
     });
     gameState.score = 0;
   });
 
-  this.physics.add.collider(meat, gameState.player, function(playerElem, meatElem) {
+  this.physics.add.collider(meat, gameState.player, function(
+    playerElem,
+    meatElem
+  ) {
     meatElem.destroy();
     gameState.bonusSound.play();
     gameState.score += 100;
     gameState.scoreText.setText(`Score: ${gameState.score}`);
   });
 
-  gameState.leftArrow.on('pointerdown', function() {
+  gameState.leftArrow.on("pointerdown", function() {
     gameState.moveRight = false;
     gameState.moveLeft = true;
   });
-  gameState.rightArrow.on('pointerdown', function() {
+  gameState.rightArrow.on("pointerdown", function() {
     gameState.moveLeft = false;
     gameState.moveRight = true;
   });
@@ -169,23 +246,23 @@ function update() {
   if (gameState.moveLeft) {
     gameState.player.setFlipX(-1);
     gameState.player.setVelocityX(-200);
-  } 
+  }
   if (gameState.moveRight) {
     gameState.player.setFlipX(0);
     gameState.player.setVelocityX(200);
-  } 
-//   if (gameState.score > 100) {
-// 	console.log(this.rockGenLoop);
-// 	// rockGenLoop.timer.timeScale = 2;
-//   } else if (gameState.score > 5000) {
-// 	this.rockGenLoop.delay = 250;
-//   } else if (gameState.score > 7000) {
-// 	this.rockGenLoop.delay = 200;
-//   } else if (gameState.score > 10000) {
-// 	this.rockGenLoop.delay =  150;
-//   } else if (gameState.score > 15000) {
-// 	this.rockGenLoop.delay =  100;
-//   }
+  }
+  //   if (gameState.score > 100) {
+  // 	console.log(this.rockGenLoop);
+  // 	// rockGenLoop.timer.timeScale = 2;
+  //   } else if (gameState.score > 5000) {
+  // 	this.rockGenLoop.delay = 250;
+  //   } else if (gameState.score > 7000) {
+  // 	this.rockGenLoop.delay = 200;
+  //   } else if (gameState.score > 10000) {
+  // 	this.rockGenLoop.delay =  150;
+  //   } else if (gameState.score > 15000) {
+  // 	this.rockGenLoop.delay =  100;
+  //   }
 }
 
 const config = {
